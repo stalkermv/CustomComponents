@@ -28,6 +28,7 @@ private struct PreviewButtonStyle: ButtonStyle {
     }
 }
 
+@available(iOS 16.0, *)
 private struct PreviewView: View {
     var body: some View {
         NavigationStack {
@@ -78,7 +79,7 @@ private struct PreviewView: View {
     }
 }
 
-@available(iOS 16.0, macOS 14.0, tvOS 16.0, watchOS 10.0, *)
+@available(iOS 17.0, macOS 14.0, tvOS 16.0, watchOS 10.0, *)
 #Preview(traits: .fixedLayout(width: 400, height: 400)) {
     PreviewView()
 }

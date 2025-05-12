@@ -245,7 +245,6 @@ private struct PreviewStepperStyle: CustomStepperStyle {
             Image(systemName: "plus")
                 .imageScale(.large)
                 .foregroundStyle(.purple)
-                .bold()
         }
     }
     

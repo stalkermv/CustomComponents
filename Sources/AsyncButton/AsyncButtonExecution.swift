@@ -17,7 +17,7 @@ import SwiftUI
         self.task?.cancel()
         self.task = Task { [weak self] in
             let loadingIndicatorTask = Task {
-                try await Task.sleep(for: .seconds(1))
+                try await Task.sleep(nanoseconds: 200_000_000)
                 try Task.checkCancellation()
                 
                 if !options.contains(.loadingIndicatorHidden) {

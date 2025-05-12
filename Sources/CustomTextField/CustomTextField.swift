@@ -89,15 +89,26 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
             return AnyView(resolved)
         }
         
-        TextField(
-            text: textBinding,
-            prompt: prompt,
-            axis: axis,
-            label: { label }
-        )
-        .textFieldStyle(style)
-        .focused($isFocused)
-        .environment(\.customTextFieldParseError, error)
+        if #available(iOS 16.0, *) {
+            TextField(
+                text: textBinding,
+                prompt: prompt,
+                axis: axis,
+                label: { label }
+            )
+            .textFieldStyle(style)
+            .focused($isFocused)
+            .environment(\.customTextFieldParseError, error)
+        } else {
+            TextField(
+                text: textBinding,
+                prompt: prompt,
+                label: { label }
+            )
+            .textFieldStyle(style)
+            .focused($isFocused)
+            .environment(\.customTextFieldParseError, error)
+        }
     }
     
     private func updateValue(_ value: String) {
@@ -191,6 +202,7 @@ private struct DemoTextFieldStyle: CustomTextFieldStyle {
     }
 }
 
+@available(iOS 16.0, *)
 private struct PreviewView: View {
     
     @State private var text = ""
@@ -218,6 +230,7 @@ private struct PreviewView: View {
     }
 }
 
+@available(iOS 16.0, *)
 #Preview {
     PreviewView()
         .textFieldStyle(.plain)
