@@ -97,7 +97,7 @@ private struct PreviewCellStyle: CustomCellStyle {
             Spacer()
             configuration.accessory
             
-            Text("Line limit: \(lineLimit)")
+            Text("Line limit: \(String(describing: lineLimit))")
                 .font(.caption)
                 .foregroundColor(.gray)
                 .padding(.leading, 8)

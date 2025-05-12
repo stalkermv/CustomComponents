@@ -180,21 +180,24 @@ where Label : View {
     /// see <doc:Declaring-a-Custom-View>.
     @MainActor public var body: some View {
         
+        let resolvedOnIncrement = onIncrement()
+        let resolvedOnDecrement = onDecrement()
+        
         let elementConfiguration = CustomStepperElementConfiguration(
-            onIncrement: onIncrement() ?? {},
-            onDecrement: onDecrement() ?? {}
+            onIncrement: resolvedOnIncrement ?? {},
+            onDecrement: resolvedOnDecrement ?? {}
         )
         
         let decrement = (elementStyle ?? style).makeDecrement(configuration: elementConfiguration)
-            .disabled(onDecrement() == nil)
+            .disabled(resolvedOnDecrement == nil)
         
         let increment = (elementStyle ?? style).makeIncrement(configuration: elementConfiguration)
-            .disabled(onIncrement() == nil)
+            .disabled(resolvedOnIncrement == nil)
         
         let configuration = CustomStepperConfiguration(
             label: .init(body: .init(label)),
-            onIncrement: onIncrement() ?? {},
-            onDecrement: onDecrement() ?? {},
+            onIncrement: resolvedOnIncrement ?? {},
+            onDecrement: resolvedOnDecrement ?? {},
             decrement: .init(body: .init(decrement)),
             increment: .init(body: .init(increment))
         )
@@ -227,7 +230,7 @@ private struct PreviewStepperStyle: CustomStepperStyle {
             configuration.decrement
             VStack {
                 configuration.label
-                Text("Line limit: \(lineLimit)")
+                Text("Line limit: \(String(describing: lineLimit))")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
