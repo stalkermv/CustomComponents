@@ -19,13 +19,16 @@ struct Component {
 }
 
 let components: [Component] = [
+    Component(name: "AsyncButton"),
     Component(name: "CustomCell"),
-    //Component(name: "CustomPicker")
+    Component(name: "CustomSection"),
+    Component(name: "CustomStepper"),
+    Component(name: "CustomTextField")
 ]
 
 let package = Package(
     name: "CustomComponents",
-    platforms: [.macOS(.v12), .iOS(.v15), .tvOS(.v15), .watchOS(.v10), .macCatalyst(.v15)],
+    platforms: [.macOS(.v13), .iOS(.v15), .tvOS(.v15), .watchOS(.v10), .macCatalyst(.v15)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(name: "CustomComponents", targets: ["CustomComponents"]),

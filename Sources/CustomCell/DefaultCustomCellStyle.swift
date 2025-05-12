@@ -1,6 +1,5 @@
 //
 //  DefaultCustomCellStyle.swift
-//  UIComponentsLibrary
 //
 //  Created by Valeriy Malishevskyi on 06.08.2024.
 //

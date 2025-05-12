@@ -1,6 +1,5 @@
 //
 //  CustomCell.swift
-//  UIComponentsLibrary
 //
 //  Created by Valeriy Malishevskyi on 06.08.2024.
 //
@@ -45,7 +44,23 @@ where Content: View, Image: View, Secondary: View, Accessory: View {
             accessory: .init(body: AnyView(accessory))
         )
         
-        AnyView(style.makeBody(configuration: configuration))
+        AnyView(style.resolve(configuration))
+    }
+}
+
+private struct CustomCellResolver<Style>: View
+where Style: CustomCellStyle {
+    let style: Style
+    let configuration: CustomCellStyleConfiguration
+    
+    var body: some View {
+        style.makeBody(configuration: configuration)
+    }
+}
+
+extension CustomCellStyle {
+    @MainActor func resolve(_ configuration: CustomCellStyleConfiguration) -> some View {
+        CustomCellResolver(style: self, configuration: configuration)
     }
 }
 
@@ -72,6 +87,26 @@ extension CustomCell {
     }
 }
 
+private struct PreviewCellStyle: CustomCellStyle {
+    @Environment(\.lineLimit) private var lineLimit
+    
+    func makeBody(configuration: Configuration) -> some View {
+        HStack {
+            configuration.image
+            configuration.label
+            Spacer()
+            configuration.accessory
+            
+            Text("Line limit: \(lineLimit)")
+                .font(.caption)
+                .foregroundColor(.gray)
+                .padding(.leading, 8)
+        }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+    }
+}
+
 #Preview {
     List {
         CustomCell {
@@ -89,6 +124,8 @@ extension CustomCell {
         } secondary: {
             Text("Secondary")
         }
+        .customCellStyle(PreviewCellStyle())
+        .environment(\.lineLimit, 20)
         
         CustomCell {
             Text("Accessory")
@@ -96,4 +133,5 @@ extension CustomCell {
             Image(systemName: "arrow.right")
         }
     }
+    .environment(\.lineLimit, 20)
 }

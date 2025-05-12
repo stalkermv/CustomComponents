@@ -1,6 +1,5 @@
 //
 //  CustomCellStyle.swift
-//  UIComponentsLibrary
 //
 //  Created by Valeriy Malishevskyi on 06.08.2024.
 //
@@ -11,7 +10,7 @@ import SwiftUI
 ///
 /// Conform to `CustomCellStyle` to customize the layout and appearance of cells across your app.
 /// Apply your style with `.customCellStyle(...)` on any view.
-public protocol CustomCellStyle {
+public protocol CustomCellStyle: DynamicProperty {
 
     /// The configuration passed into a custom cell style.
     typealias Configuration = CustomCellStyleConfiguration
