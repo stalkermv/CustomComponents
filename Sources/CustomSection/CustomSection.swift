@@ -88,7 +88,7 @@ private struct PreviewSectionStyle: CustomSectionStyle {
                 .font(.footnote)
                 .foregroundColor(.gray)
             
-            Text("Line limit: \(lineLimit)")
+            Text("Line limit: \(String(describing: lineLimit))")
                 .font(.subheadline)
                 .foregroundColor(.green)
         }
