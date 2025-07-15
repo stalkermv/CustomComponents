@@ -33,8 +33,24 @@ struct CustomPickerItem<SelectionValue: Hashable> : View {
                 selection.toggle(tag)
             }
         } label: {
-            AnyView(style.makeItem(configuration: configuration))
+            AnyView(style.resolve(configuration: configuration))
         }
         .disabled(isDisabled)
+    }
+}
+
+struct CustomPickerItemResolver<Style>: View
+where Style: CustomPickerItemStyle {
+    let style: Style
+    let configuration: CustomPickerItemConfiguration<AnyHashable>
+    
+    var body: some View {
+        style.makeItem(configuration: configuration)
+    }
+}
+
+extension CustomPickerItemStyle {
+    @MainActor func resolve(configuration: CustomPickerItemConfiguration<SelectionValue>) -> some View {
+        CustomPickerItemResolver(style: self, configuration: configuration)
     }
 }

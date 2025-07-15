@@ -178,8 +178,8 @@ private struct DemoTextFieldStyle: CustomTextFieldStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack {
             configuration.label
-            if !configuration.text.wrappedValue.isEmpty {
-                Button(action: { configuration.text.wrappedValue = "" }) {
+            if !configuration.text.isEmpty {
+                Button(action: { configuration.text = "" }) {
                     Image(systemName: "xmark")
                 }
                 .imageScale(.small)

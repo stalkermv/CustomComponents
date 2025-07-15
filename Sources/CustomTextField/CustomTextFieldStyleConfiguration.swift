@@ -29,7 +29,7 @@ public struct CustomTextFieldStyleConfiguration {
     /// A binding to the user-entered or formatted string content.
     ///
     /// Use this to create the actual `TextField` within your style implementation.
-    public let text: Binding<String>
+    @Binding public var text: String
 
     /// An optional placeholder to show when the field is empty.
     public let placeholder: Text?

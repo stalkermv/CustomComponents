@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public protocol CustomPickerItemStyle {
+public protocol CustomPickerItemStyle: DynamicProperty {
     
     typealias ItemConfiguration = CustomPickerItemConfiguration<SelectionValue>
     typealias SelectionValue = AnyHashable

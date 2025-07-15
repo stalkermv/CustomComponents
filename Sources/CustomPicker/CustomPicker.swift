@@ -44,7 +44,7 @@ public struct CustomPicker<SelectionValue: Hashable, Content: View, Label: View>
             label: .init(body: AnyView(label))
         )
         
-        AnyView(style.makeBody(configuration: configuration))
+        AnyView(style.resolve(configuration))
     }
     
     private func makeContent() -> some View {
@@ -54,6 +54,22 @@ public struct CustomPicker<SelectionValue: Hashable, Content: View, Label: View>
                 selection: selection
             )
         }
+    }
+}
+
+struct CustomPickerResolver<Style>: View
+where Style: CustomPickerStyle {
+    let style: Style
+    let configuration: CustomPickerConfiguration<AnyHashable>
+    
+    var body: some View {
+        style.makeBody(configuration: configuration)
+    }
+}
+
+extension CustomPickerStyle {
+    @MainActor func resolve(_ configuration: CustomPickerConfiguration<SelectionValue>) -> some View {
+        CustomPickerResolver(style: self, configuration: configuration)
     }
 }
 
