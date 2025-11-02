@@ -72,6 +72,7 @@ extension CustomSection where Header == Text, Content : View, Footer == EmptyVie
     /// - Parameters:
     ///   - title: A string that describes the contents of the section.
     ///   - content: The section's content.
+    @_disfavoredOverload
     public init<S>(_ title: S, @ViewBuilder content: () -> Content) where S : StringProtocol {
         self.init(content: content, header: { Text(title) })
     }
