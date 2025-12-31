@@ -26,7 +26,7 @@ public struct CustomSection<Header: View, Footer: View, Content: View>: View {
         self.init(content: content, header: { EmptyView() }, footer: { EmptyView() })
     }
     
-    public init(@ViewBuilder content: () -> Content, header: () -> Header)
+    public init(@ViewBuilder content: () -> Content, @ViewBuilder header: () -> Header)
     where Footer == EmptyView {
         self.init(content: content, header: header, footer: { EmptyView() })
     }
