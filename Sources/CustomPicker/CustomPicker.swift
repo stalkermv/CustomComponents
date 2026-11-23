@@ -103,12 +103,10 @@ public struct CustomPicker<SelectionValue: Hashable, Content: View, Label: View>
     /// the selection type are still concrete: a style sees the options wrapped
     /// in items and the selection as `AnyHashable`, so it cannot match tags.
     private func makeSelectedContent() -> some View {
-        Group(subviews: content) { subviews in
-            ForEach(subviews) { subview in
-                if let tag = subview.containerValues.tag(for: SelectionValue.self),
-                   selection.contains(tag) {
-                    subview
-                }
+        ForEach(subviews: content) { subview in
+            if let tag = subview.traitValues.tag(for: SelectionValue.self),
+               selection.contains(tag) {
+                subview
             }
         }
     }
