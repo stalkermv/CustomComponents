@@ -24,7 +24,7 @@ Alternatively, add it directly to your Package.swift. 2.0 is currently a pre-rel
 
 ```
 dependencies: [
-    .package(url: "https://github.com/stalkermv/CustomComponents.git", from: "2.0.0-beta.2")
+    .package(url: "https://github.com/stalkermv/CustomComponents.git", from: "2.0.0-beta.3")
 ]
 ```
 
@@ -47,6 +47,24 @@ struct ContentView: View {
     }
 }
 ```
+
+### Capping a scrolling block
+
+```swift
+CommandOutput(lines)
+    .scrollHeightLimit(300, pinsToBottom: true)
+```
+
+The view is as tall as its content until 300 points, then scrolls inside itself. `ScrollViewThatFits(maxHeight:)` is the same as a view. On iOS 18, macOS 15, tvOS 18 and watchOS 11 and later the edges that can still scroll fade out; `scrollEdgeFade(_:)` turns that off.
+
+### Parsing text fields
+
+```swift
+CustomTextField(value: $amount, format: .currency(code: "USD"))
+    .parseBehavior(.lenient.debounced(.milliseconds(300)))
+```
+
+`.strict` (default) rewrites the text to the formatted output on every keystroke. `.lenient` keeps what the user typed.
 
 ## License
 
