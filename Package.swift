@@ -31,7 +31,7 @@ let components: [Component] = [
 
 let package = Package(
     name: "CustomComponents",
-    platforms: [.macOS(.v14), .iOS(.v16), .tvOS(.v15), .watchOS(.v10), .macCatalyst(.v15)],
+    platforms: [.macOS(.v14), .iOS(.v17), .tvOS(.v17), .watchOS(.v10), .macCatalyst(.v17)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(name: "CustomComponents", targets: ["CustomComponents"]),
@@ -39,7 +39,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/stalkermv/SwiftHelpers.git", from: "1.0.0"),
         .package(url: "https://github.com/stalkermv/SwiftUIHelpers.git", from: "1.0.0"),
-        .package(url: "https://github.com/stalkermv/SwiftUIBackports.git", from: "1.1.0"),
+        .package(url: "https://github.com/stalkermv/SwiftUIBackports.git", from: "2.0.0-beta.1"),
     ]
 )
 
