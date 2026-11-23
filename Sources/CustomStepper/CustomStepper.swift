@@ -1,3 +1,4 @@
+#if !os(tvOS)
 //
 //  CustomStepper.swift
 //
@@ -281,3 +282,5 @@ private struct PreviewView: View {
 #Preview {
     PreviewView()
 }
+
+#endif

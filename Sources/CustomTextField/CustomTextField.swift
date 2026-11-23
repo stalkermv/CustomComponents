@@ -172,6 +172,15 @@ extension CustomTextFieldStyle {
 
 // MARK: - Preview
 
+/// Fill behind the demo fields: the bar material, which watchOS and tvOS do not have.
+private let previewBarFill: AnyShapeStyle = {
+    #if os(watchOS) || os(tvOS)
+    AnyShapeStyle(Color.secondary.opacity(0.2))
+    #else
+    AnyShapeStyle(Material.bar)
+    #endif
+}()
+
 private struct DemoTextFieldStyle: CustomTextFieldStyle {
     @Environment(\.lineLimit) private var lineLimit
     
@@ -197,7 +206,7 @@ private struct DemoTextFieldStyle: CustomTextFieldStyle {
         }
         .background {
             RoundedRectangle(cornerRadius: 12)
-                .foregroundStyle(.bar)
+                .foregroundStyle(previewBarFill)
         }
     }
 }
@@ -225,7 +234,7 @@ private struct PreviewView: View {
         TextField("Test", text: $text)
             .background {
                 RoundedRectangle(cornerRadius: 12)
-                    .foregroundStyle(.bar)
+                    .foregroundStyle(previewBarFill)
             }
     }
 }

@@ -38,7 +38,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/stalkermv/SwiftHelpers.git", from: "1.0.0"),
-        .package(url: "https://github.com/stalkermv/SwiftUIHelpers.git", from: "1.0.0"),
+        .package(url: "https://github.com/stalkermv/SwiftUIHelpers.git", from: "2.0.0-beta.1"),
         .package(url: "https://github.com/stalkermv/SwiftUIBackports.git", from: "2.0.0-beta.1"),
     ]
 )

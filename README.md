@@ -11,6 +11,7 @@ CustomComponents is a Swift package offering a collection of reusable, productio
 
 - Swift 6.1 or later
 - iOS 17, macOS 14, tvOS 17, or watchOS 10 and later
+- `CustomStepper` is not available on tvOS
 
 ## Installation
 
@@ -23,7 +24,7 @@ Alternatively, add it directly to your Package.swift. 2.0 is currently a pre-rel
 
 ```
 dependencies: [
-    .package(url: "https://github.com/stalkermv/CustomComponents.git", from: "2.0.0-beta.1")
+    .package(url: "https://github.com/stalkermv/CustomComponents.git", from: "2.0.0-beta.2")
 ]
 ```
 

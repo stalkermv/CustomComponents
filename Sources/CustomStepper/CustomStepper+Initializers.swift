@@ -1,3 +1,4 @@
+#if !os(tvOS)
 //
 //  CustomStepper+Initializers.swift
 //  CustomComponents
@@ -1038,3 +1039,5 @@ extension CustomStepper where Label == Text {
         )
     }
 }
+
+#endif

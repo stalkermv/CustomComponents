@@ -1,3 +1,4 @@
+#if !os(tvOS)
 //
 //  CustomStepperStyle.swift
 //
@@ -24,3 +25,5 @@ public protocol CustomStepperStyle: CustomStepperDecrementStyle, CustomStepperEl
     /// - Returns: A complete stepper view.
     @MainActor func makeBody(configuration: Configuration) -> Self.Body
 }
+
+#endif

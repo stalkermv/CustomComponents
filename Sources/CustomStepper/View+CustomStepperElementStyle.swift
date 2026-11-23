@@ -1,3 +1,4 @@
+#if !os(tvOS)
 //
 //  View+CustomStepperElementStyle.swift
 //
@@ -27,3 +28,5 @@ extension EnvironmentValues {
 private struct CustomStepperElementConfigurationKey: EnvironmentKey {
     nonisolated(unsafe) static let defaultValue: (any CustomStepperElementStyle)? = nil
 }
+
+#endif

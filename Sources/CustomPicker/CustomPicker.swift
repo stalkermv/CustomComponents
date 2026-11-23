@@ -118,7 +118,9 @@ private struct PreviewView: View {
         } label: {
             Text("Select value")
         }
+        #if !os(watchOS)
         .pickerStyle(.segmented)
+        #endif
         .customPickerStyle(MyPickerStyle())
     }
 }

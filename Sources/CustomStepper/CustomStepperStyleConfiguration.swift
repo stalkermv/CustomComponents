@@ -1,3 +1,4 @@
+#if !os(tvOS)
 //
 //  CustomStepperStyleConfiguration.swift
 //
@@ -41,3 +42,5 @@ public struct CustomStepperConfiguration {
     /// The increment control view.
     public let increment: Increment
 }
+
+#endif

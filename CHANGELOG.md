@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented in this file.
 
+## 2.0.0-beta.2 - 2026-11-23
+
+### Breaking
+
+- `CustomStepper` and its styles are not available on tvOS, where SwiftUI has no `Stepper`.
+
+### Changed
+
+- Depends on SwiftUIHelpers 2.0 (`from: "2.0.0-beta.1"`).
+
+### Fixed
+
+- The package builds for tvOS and watchOS. Preview-only code that used `Material.bar` (not available on tvOS and watchOS) and `.pickerStyle(.segmented)` (not available on watchOS) is guarded for those platforms.
+
 ## 2.0.0-beta.1 - 2026-11-23
 
 ### Breaking
@@ -15,4 +29,4 @@ All notable changes to this project are documented in this file.
 
 ### Known issues
 
-- The package does not build for tvOS and watchOS yet: SwiftUIHelpers 1.1.8 does not compile on those platforms. This is expected to be fixed by a SwiftUIHelpers update in a later beta.
+- The package does not build for tvOS and watchOS yet: SwiftUIHelpers 1.1.8 does not compile on those platforms. Fixed in 2.0.0-beta.2.
