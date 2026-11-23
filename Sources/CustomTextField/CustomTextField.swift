@@ -34,6 +34,7 @@ import SwiftUI
 public struct CustomTextField<Label, F> : View
 where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
     @Environment(\.customTextFieldStyle) var customTextFieldStyle
+    @Environment(\.parseBehavior) private var parseBehavior
     
     private let label: Label
     private let prompt: Text?
@@ -42,12 +43,21 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
     @Binding private var value: F.FormatInput?
     
     @FocusState private var isFocused: Bool
-    @State private var error: LocalizedError?
+    @State private var latestError: LocalizedError?
+    @State private var presentedError: LocalizedError?
     @State private var localText: String = ""
+    @State private var debounceTask: Task<Void, Never>?
     
     private var textBinding: Binding<String> {
         Binding(
-            get: { readValue() ?? localText },
+            get: {
+                switch parseBehavior.textDisplay {
+                case .formatted:
+                    return readValue() ?? localText
+                case .raw:
+                    return localText
+                }
+            },
             set: { updateValue($0) }
         )
     }
@@ -98,7 +108,8 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
             )
             .textFieldStyle(style)
             .focused($isFocused)
-            .environment(\.customTextFieldParseError, error)
+            .environment(\.customTextFieldParseError, presentedError)
+            .onAppear { syncLocalText() }
         } else {
             TextField(
                 text: textBinding,
@@ -107,25 +118,63 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
             )
             .textFieldStyle(style)
             .focused($isFocused)
-            .environment(\.customTextFieldParseError, error)
+            .environment(\.customTextFieldParseError, presentedError)
+            .onAppear { syncLocalText() }
         }
     }
     
-    private func updateValue(_ value: String) {
+    private func updateValue(_ newText: String) {
+        localText = newText
+        
+        // Hide error immediately when user types (if configured)
+        if parseBehavior.hidesErrorOnInput {
+            presentedError = nil
+        }
+        
         do {
-            let parsedValue = try format.parseStrategy.parse(value)
+            let parsedValue = try format.parseStrategy.parse(newText)
             self.value = parsedValue
-            self.error = nil
+            self.latestError = nil
+            schedulePresentError(nil)
         } catch {
-            self.localText = value
-            self.value = nil
-            self.error = error as? LocalizedError
+            // In strict/formatted mode, nil out value on parse failure.
+            // In lenient/raw mode, keep the last valid value so the form
+            // state doesn't change spuriously (e.g. Save button stays correct).
+            if parseBehavior.textDisplay == .formatted {
+                self.value = nil
+            }
+            let localized = error as? LocalizedError
+            self.latestError = localized
+            schedulePresentError(localized)
+        }
+    }
+    
+    private func schedulePresentError(_ error: LocalizedError?) {
+        debounceTask?.cancel()
+        
+        guard let debounce = parseBehavior.errorDebounce else {
+            presentedError = error
+            return
+        }
+        
+        debounceTask = Task { @MainActor in
+            try? await Task.sleep(for: debounce)
+            guard !Task.isCancelled else { return }
+            presentedError = latestError
         }
     }
     
     private func readValue() -> F.FormatOutput? {
         guard let value else { return nil }
         return format.format(value)
+    }
+    
+    /// Syncs `localText` from the current value so that `.raw` mode
+    /// shows the formatted content when the view first appears.
+    private func syncLocalText() {
+        if let formatted = readValue() {
+            localText = formatted
+        }
     }
 }
 

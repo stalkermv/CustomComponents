@@ -26,7 +26,8 @@ let components: [Component] = [
     Component(name: "CustomSection"),
     Component(name: "CustomStepper"),
     Component(name: "CustomContentUnavailableView"),
-    Component(name: "CustomTextField")
+    Component(name: "CustomTextField"),
+    Component(name: "DynamicScroll")
 ]
 
 let package = Package(
@@ -38,7 +39,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/stalkermv/SwiftHelpers.git", from: "1.0.0"),
-        .package(url: "https://github.com/stalkermv/SwiftUIHelpers.git", from: "2.0.0-beta.1"),
+        .package(url: "https://github.com/stalkermv/SwiftUIHelpers.git", from: "2.0.0-beta.2"),
         .package(url: "https://github.com/stalkermv/SwiftUIBackports.git", from: "2.0.0-beta.1"),
     ]
 )
@@ -49,4 +50,10 @@ let componentsTargets: [Target] = components.map { component in
     .target(name: component.name, dependencies: component.dependencies)
 }
 
-package.targets = [umbrella, testTarget] + componentsTargets
+/// Components with tests of their own list them here.
+let componentTestTargets: [Target] = [
+    .testTarget(name: "DynamicScrollTests", dependencies: ["DynamicScroll"]),
+    .testTarget(name: "CustomTextFieldTests", dependencies: ["CustomTextField"]),
+]
+
+package.targets = [umbrella, testTarget] + componentsTargets + componentTestTargets

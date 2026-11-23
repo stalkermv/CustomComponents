@@ -1,5 +1,5 @@
 {
-  "originHash" : "69060bb910ce016ed9c0204209b31816f9d8747b33db248fb5d9ae2c13597a6d",
+  "originHash" : "5d78a45ced43192c5d6ad3175451b2a1c2b08fd4f211116ba8c53c964091ad80",
   "pins" : [
     {
       "identity" : "swifthelpers",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/stalkermv/SwiftUIHelpers.git",
       "state" : {
-        "revision" : "6f6af071b6468e7e5c922fb70e52eb3bddb1c778",
-        "version" : "2.0.0-beta.1"
+        "revision" : "4ba031322c8a5366e9e1d068c0d9bf325b132169",
+        "version" : "2.0.0-beta.2"
       }
     }
   ],
