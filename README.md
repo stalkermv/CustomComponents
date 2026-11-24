@@ -24,7 +24,7 @@ Alternatively, add it directly to your Package.swift. 2.0 is currently a pre-rel
 
 ```
 dependencies: [
-    .package(url: "https://github.com/stalkermv/CustomComponents.git", from: "2.0.0-beta.4")
+    .package(url: "https://github.com/stalkermv/CustomComponents.git", from: "2.0.0-beta.5")
 ]
 ```
 
@@ -67,6 +67,12 @@ CustomTextField(value: $amount, format: .currency(code: "USD"))
 ```
 
 `.strict` (default) rewrites the text to the formatted output on every keystroke. `.lenient` keeps what the user typed.
+
+### Notes
+
+- `AsyncButton` does not draw a progress indicator. While its action runs it sets the `isLoading` environment value, and the label or your `ButtonStyle` draws the indicator.
+- In a `Form` row, SwiftUI gives one tap to every button in the row. This affects any two buttons, so set `.buttonStyle(.plain)` on `CustomStepper` when you use it inside a `Form`.
+- `CustomCell` has no API for the width of its image column. You decide it in your `CustomCellStyle`.
 
 ## License
 

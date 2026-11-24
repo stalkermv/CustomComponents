@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## 2.0.0-beta.5 - 2026-11-24
+
+### Documentation
+
+- `AsyncButton` documents that it does not draw a progress indicator and that its label or `ButtonStyle` reads the `isLoading` environment value.
+- `CustomStepper` documents that inside a `Form` row you set `.buttonStyle(.plain)`, because SwiftUI gives one tap to every button in the row.
+- README notes for both, and for the `CustomCell` image column width, which is decided in `CustomCellStyle`.
+
 ## 2.0.0-beta.4 - 2026-11-24
 
 ### Added
