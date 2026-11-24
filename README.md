@@ -24,7 +24,7 @@ Alternatively, add it directly to your Package.swift. 2.0 is currently a pre-rel
 
 ```
 dependencies: [
-    .package(url: "https://github.com/stalkermv/CustomComponents.git", from: "2.0.0-beta.3")
+    .package(url: "https://github.com/stalkermv/CustomComponents.git", from: "2.0.0-beta.4")
 ]
 ```
 
@@ -35,6 +35,8 @@ Import CustomComponents in your SwiftUI files:
 ```swift
 import CustomComponents
 ```
+
+One import is enough: it re-exports every component. If you only need a part of the package, import the module you need instead, for example `import DynamicScroll` or `import AsyncButton`.
 
 Then, utilize the provided components as needed. For example:
 

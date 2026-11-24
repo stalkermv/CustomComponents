@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## 2.0.0-beta.4 - 2026-11-24
+
+### Added
+
+- `import CustomComponents` now re-exports every component module (`AsyncButton`, `CustomCell`, `CustomContentUnavailableView`, `CustomPicker`, `CustomSection`, `CustomStepper` except on tvOS, `CustomTextField`, `DynamicScroll`), so one import exposes all types. The modules can still be imported one by one.
+- A test target that only does `import CustomComponents` and uses a type from each module.
+
 ## 2.0.0-beta.3 - 2026-11-23
 
 ### Added

@@ -54,6 +54,7 @@ let componentsTargets: [Target] = components.map { component in
 let componentTestTargets: [Target] = [
     .testTarget(name: "DynamicScrollTests", dependencies: ["DynamicScroll"]),
     .testTarget(name: "CustomTextFieldTests", dependencies: ["CustomTextField"]),
+    .testTarget(name: "CustomComponentsImportTests", dependencies: ["CustomComponents"]),
 ]
 
 package.targets = [umbrella, testTarget] + componentsTargets + componentTestTargets
