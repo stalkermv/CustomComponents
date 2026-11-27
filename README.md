@@ -62,17 +62,19 @@ The view is as tall as its content until 300 points, then scrolls inside itself.
 ### Parsing text fields
 
 ```swift
-CustomTextField(value: $amount, format: .currency(code: "USD"))
+CustomTextField("Amount", value: $amount, format: .currency(code: "USD"))
     .parseBehavior(.lenient.debounced(.milliseconds(300)))
 ```
 
-`.strict` (default) rewrites the text to the formatted output on every keystroke. `.lenient` keeps what the user typed.
+`.strict` (default) rewrites the text to the formatted output on every keystroke. `.lenient` keeps what the user typed and shows a parse error when the field loses focus, or after a pause in typing with `.debounced(_:)`. When the bound value changes from outside the field, such as a reset, the field shows the new value in either mode.
 
 ### Notes
 
 - `AsyncButton` does not draw a progress indicator. While its action runs it sets the `isLoading` environment value, and the label or your `ButtonStyle` draws the indicator.
 - In a `Form` row, SwiftUI gives one tap to every button in the row. This affects any two buttons, so set `.buttonStyle(.plain)` on `CustomStepper` when you use it inside a `Form`.
 - `CustomCell` has no API for the width of its image column. You decide it in your `CustomCellStyle`.
+- To make a `CustomPicker` option unselectable, use `.selectionDisabled()` on the option. `.disabled(true)` inside an option only affects the option's own content: the picker cannot read it, so the option stays selectable.
+- The default `CustomPicker` style shows `currentValueLabel` on iOS 18, macOS 15, tvOS 18, watchOS 11 and later. Earlier systems show the selected option.
 
 ## License
 

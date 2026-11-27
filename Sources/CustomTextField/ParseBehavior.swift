@@ -13,18 +13,22 @@ import SwiftUI
 /// - ``strict``: Rewrites displayed text to the formatted output on every keystroke.
 ///   Errors appear immediately when parsing fails. This is the default behavior.
 ///
-/// - ``lenient``: Keeps the user's raw input visible. Error and value are updated
-///   on every keystroke, but error display can be debounced for a smoother experience.
+/// - ``lenient``: Keeps the user's raw input visible. The value is updated on every
+///   keystroke. A parse error stays hidden while the user types and appears when the
+///   field loses focus, or after a pause in typing with ``debounced(_:)``.
 ///
 /// Both modes support optional debouncing and automatic error hiding when typing resumes:
 ///
 /// ```swift
-/// CustomTextField(value: $username, format: .instagramUsername)
+/// CustomTextField("Username", value: $username, format: .instagramUsername)
 ///     .parseBehavior(.lenient.debounced(.milliseconds(300)))
 ///
-/// CustomTextField(value: $amount, format: .currency(code: "USD"))
+/// CustomTextField("Amount", value: $amount, format: .currency(code: "USD"))
 ///     .parseBehavior(.strict)
 /// ```
+///
+/// When the bound value changes from outside the field, such as a reset, the field
+/// shows the new value and clears its error in either mode.
 public struct ParseBehavior: Sendable, Equatable {
 
     /// How the text field displays the current text content.
@@ -43,6 +47,7 @@ public struct ParseBehavior: Sendable, Equatable {
     public let errorDebounce: Duration?
 
     /// When `true`, any new keystroke hides the current error until the debounce fires again.
+    /// With no debounce, the error stays hidden until the field loses focus.
     public let hidesErrorOnInput: Bool
 
     public init(
@@ -62,7 +67,7 @@ public struct ParseBehavior: Sendable, Equatable {
     public static let strict = ParseBehavior(textDisplay: .formatted)
 
     /// Keeps user's raw input visible.  
-    /// Errors appear immediately, hidden when typing resumes.
+    /// Errors stay hidden while the user types and appear when the field loses focus.
     public static let lenient = ParseBehavior(
         textDisplay: .raw,
         hidesErrorOnInput: true
@@ -90,6 +95,32 @@ public struct ParseBehavior: Sendable, Equatable {
             errorDebounce: errorDebounce,
             hidesErrorOnInput: hides
         )
+    }
+}
+
+// MARK: - Error presentation
+
+extension ParseBehavior {
+    /// When `CustomTextField` shows a parse error.
+    enum ErrorPresentation: Equatable {
+        case now
+        case afterDelay(Duration)
+        case onFocusLoss
+    }
+
+    /// When to show `error`, which is `nil` once the text parses again.
+    func errorPresentation(for error: (any Error)?, isFocused: Bool) -> ErrorPresentation {
+        guard error != nil else { return .now }
+        if let errorDebounce { return .afterDelay(errorDebounce) }
+        // Showing the error at once would undo the hiding on every keystroke.
+        if hidesErrorOnInput && isFocused { return .onFocusLoss }
+        return .now
+    }
+
+    /// Whether a new formatted value came from outside the field rather than
+    /// from the text the field last parsed.
+    static func isExternalChange(_ newOutput: String?, lastWritten: String?) -> Bool {
+        newOutput != lastWritten
     }
 }
 

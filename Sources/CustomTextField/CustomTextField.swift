@@ -47,6 +47,9 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
     @State private var presentedError: LocalizedError?
     @State private var localText: String = ""
     @State private var debounceTask: Task<Void, Never>?
+    /// The formatted value this field last wrote to the binding. A change to
+    /// any other value came from outside, such as a reset.
+    @State private var lastWrittenOutput: String?
     
     private var textBinding: Binding<String> {
         Binding(
@@ -110,6 +113,12 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
             .focused($isFocused)
             .environment(\.customTextFieldParseError, presentedError)
             .onAppear { syncLocalText() }
+            .onChange(of: readValue()) { _, newOutput in
+                valueDidChange(to: newOutput)
+            }
+            .onChange(of: isFocused) { _, isFocused in
+                if !isFocused { presentPendingError() }
+            }
         } else {
             TextField(
                 text: textBinding,
@@ -120,6 +129,12 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
             .focused($isFocused)
             .environment(\.customTextFieldParseError, presentedError)
             .onAppear { syncLocalText() }
+            .onChange(of: readValue()) { _, newOutput in
+                valueDidChange(to: newOutput)
+            }
+            .onChange(of: isFocused) { _, isFocused in
+                if !isFocused { presentPendingError() }
+            }
         }
     }
     
@@ -133,6 +148,7 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
         
         do {
             let parsedValue = try format.parseStrategy.parse(newText)
+            lastWrittenOutput = format.format(parsedValue)
             self.value = parsedValue
             self.latestError = nil
             schedulePresentError(nil)
@@ -141,6 +157,7 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
             // In lenient/raw mode, keep the last valid value so the form
             // state doesn't change spuriously (e.g. Save button stays correct).
             if parseBehavior.textDisplay == .formatted {
+                lastWrittenOutput = nil
                 self.value = nil
             }
             let localized = error as? LocalizedError
@@ -152,16 +169,38 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
     private func schedulePresentError(_ error: LocalizedError?) {
         debounceTask?.cancel()
         
-        guard let debounce = parseBehavior.errorDebounce else {
+        switch parseBehavior.errorPresentation(for: error, isFocused: isFocused) {
+        case .now:
             presentedError = error
-            return
+        case .afterDelay(let debounce):
+            debounceTask = Task { @MainActor in
+                try? await Task.sleep(for: debounce)
+                guard !Task.isCancelled else { return }
+                presentedError = latestError
+            }
+        case .onFocusLoss:
+            // Shown by `presentPendingError()` when the user leaves the field.
+            break
         }
-        
-        debounceTask = Task { @MainActor in
-            try? await Task.sleep(for: debounce)
-            guard !Task.isCancelled else { return }
-            presentedError = latestError
-        }
+    }
+
+    /// Shows the error that was held back while the user was typing.
+    private func presentPendingError() {
+        guard parseBehavior.errorPresentation(for: latestError, isFocused: true) == .onFocusLoss else { return }
+        debounceTask?.cancel()
+        presentedError = latestError
+    }
+
+    /// Brings the text in line with a value that changed outside the field,
+    /// such as a reset. Values the field wrote itself are left alone, so the
+    /// text the user is typing is not rewritten.
+    private func valueDidChange(to newOutput: String?) {
+        guard ParseBehavior.isExternalChange(newOutput, lastWritten: lastWrittenOutput) else { return }
+        lastWrittenOutput = newOutput
+        localText = newOutput ?? ""
+        debounceTask?.cancel()
+        latestError = nil
+        presentedError = nil
     }
     
     private func readValue() -> F.FormatOutput? {
@@ -172,7 +211,8 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
     /// Syncs `localText` from the current value so that `.raw` mode
     /// shows the formatted content when the view first appears.
     private func syncLocalText() {
-        if let formatted = readValue() {
+        lastWrittenOutput = readValue()
+        if let formatted = lastWrittenOutput {
             localText = formatted
         }
     }

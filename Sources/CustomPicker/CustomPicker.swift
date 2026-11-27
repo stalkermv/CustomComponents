@@ -48,6 +48,11 @@ public struct CustomPicker<SelectionValue: Hashable, Content: View, Label: View>
 
     /// Creates a picker that shows `currentValueLabel` as its value instead
     /// of the selected option, such as a short name for a long option.
+    ///
+    /// The default style passes it to the system `Picker`, which shows it on
+    /// iOS 18, macOS 15, tvOS 18, watchOS 11 and later. Earlier systems show
+    /// the selected option. A custom style reads it from
+    /// `configuration.currentValueLabel`.
     @_disfavoredOverload
     public init<CurrentValueLabel: View>(
         selection: Binding<SelectionValue>,
@@ -65,6 +70,11 @@ public struct CustomPicker<SelectionValue: Hashable, Content: View, Label: View>
 
     /// Creates a multiple-selection picker that shows `currentValueLabel` as
     /// its value instead of the selected options.
+    ///
+    /// The default style passes it to the system `Picker`, which shows it on
+    /// iOS 18, macOS 15, tvOS 18, watchOS 11 and later. Earlier systems show
+    /// the selected options. A custom style reads it from
+    /// `configuration.currentValueLabel`.
     public init<CurrentValueLabel: View>(
         selection: Binding<Set<SelectionValue>>,
         @ViewBuilder content: () -> Content,
@@ -84,7 +94,8 @@ public struct CustomPicker<SelectionValue: Hashable, Content: View, Label: View>
             selection: selection.binding,
             content: .init(body: AnyView(makeContent())),
             label: .init(body: AnyView(label)),
-            currentValueLabel: .init(body: currentValueLabel ?? AnyView(makeSelectedContent()))
+            currentValueLabel: .init(body: currentValueLabel ?? AnyView(makeSelectedContent())),
+            hasCustomCurrentValueLabel: currentValueLabel != nil
         )
 
         AnyView(style.resolve(configuration))

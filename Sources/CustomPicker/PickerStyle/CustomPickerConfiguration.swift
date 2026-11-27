@@ -28,4 +28,8 @@ public struct CustomPickerConfiguration<SelectionValue: Hashable> {
     public let content: Content
     public let label: Label
     public let currentValueLabel: CurrentValueLabel
+
+    /// Whether the picker was given its own `currentValueLabel`, rather than
+    /// showing the selected options.
+    let hasCustomCurrentValueLabel: Bool
 }

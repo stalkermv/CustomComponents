@@ -2,6 +2,19 @@
 
 All notable changes to this project are documented in this file.
 
+## Unreleased
+
+### Fixed
+
+- The default `CustomPicker` style ignored `currentValueLabel`. It now passes it to the system `Picker`, which shows it on iOS 18, macOS 15, tvOS 18, watchOS 11 and later; earlier systems show the selected option.
+- `CustomTextField` kept showing old text when the bound value changed from outside the field, such as a reset, and the next edit started from that text. The field now shows the new value and clears its error.
+- With `.lenient`, a parse error was hidden on each keystroke and shown again straight away, so it never went away while typing. Without a debounce, the error now stays hidden while the field is focused and appears when it loses focus.
+
+### Documentation
+
+- `.disabled(true)` inside a `CustomPicker` option does not reach the picker, so the option stays selectable; use `.selectionDisabled()` on the option. Noted in the README.
+- The README parsing example now uses an initializer that exists (`CustomTextField("Amount", value:format:)`), and a test keeps it compiling.
+
 ## 2.0.0-beta.5 - 2026-11-24
 
 ### Documentation

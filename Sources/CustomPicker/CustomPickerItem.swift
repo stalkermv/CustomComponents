@@ -25,6 +25,9 @@ struct CustomPickerItem<SelectionValue: Hashable> : View {
         // An option with no tag cannot be chosen, so it is not a control the
         // user can aim at either — otherwise it looks pressable and answers
         // with nothing.
+        // `.disabled(_:)` applied inside the option is not visible here: the
+        // subview resolves in this view's environment, not the option's.
+        // `.selectionDisabled(_:)` is the modifier that reaches the picker.
         let isDisabled = subview.traitValues.selectionDisabled || tag == nil
 
         let configuration = CustomPickerItemConfiguration(
