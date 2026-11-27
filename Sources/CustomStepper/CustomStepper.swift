@@ -1,3 +1,4 @@
+#if !os(tvOS)
 //
 //  CustomStepper.swift
 //
@@ -77,6 +78,11 @@ import SwiftUI
 ///     }
 ///
 /// ![A view displaying a stepper with a step size of five, and a prescribed range of 1 though 50.](SwiftUI-Stepper-value-step-range.png)
+///
+/// Inside a `Form` row, SwiftUI hands one tap to every button in the row, so the
+/// increment and decrement buttons both fire. This is how SwiftUI treats any two
+/// buttons in a row, not something specific to `CustomStepper`. Set
+/// `.buttonStyle(.plain)` on the stepper when you use it in a `Form`.
 @available(iOS 13.0, macOS 10.15, watchOS 9.0, *)
 @available(tvOS, unavailable)
 @MainActor public struct CustomStepper<Label> : View
@@ -281,3 +287,5 @@ private struct PreviewView: View {
 #Preview {
     PreviewView()
 }
+
+#endif

@@ -1,3 +1,4 @@
+#if !os(tvOS)
 //
 //  CustomStepperElementStyle.swift
 //
@@ -36,3 +37,5 @@ public protocol CustomStepperIncrementStyle {
     /// - Returns: A view that performs an increment action.
     @MainActor func makeIncrement(configuration: CustomStepperElementConfiguration) -> IncrementBody
 }
+
+#endif

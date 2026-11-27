@@ -34,6 +34,7 @@ import SwiftUI
 public struct CustomTextField<Label, F> : View
 where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
     @Environment(\.customTextFieldStyle) var customTextFieldStyle
+    @Environment(\.parseBehavior) private var parseBehavior
     
     private let label: Label
     private let prompt: Text?
@@ -42,12 +43,24 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
     @Binding private var value: F.FormatInput?
     
     @FocusState private var isFocused: Bool
-    @State private var error: LocalizedError?
+    @State private var latestError: LocalizedError?
+    @State private var presentedError: LocalizedError?
     @State private var localText: String = ""
+    @State private var debounceTask: Task<Void, Never>?
+    /// The formatted value this field last wrote to the binding. A change to
+    /// any other value came from outside, such as a reset.
+    @State private var lastWrittenOutput: String?
     
     private var textBinding: Binding<String> {
         Binding(
-            get: { readValue() ?? localText },
+            get: {
+                switch parseBehavior.textDisplay {
+                case .formatted:
+                    return readValue() ?? localText
+                case .raw:
+                    return localText
+                }
+            },
             set: { updateValue($0) }
         )
     }
@@ -98,7 +111,14 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
             )
             .textFieldStyle(style)
             .focused($isFocused)
-            .environment(\.customTextFieldParseError, error)
+            .environment(\.customTextFieldParseError, presentedError)
+            .onAppear { syncLocalText() }
+            .onChange(of: readValue()) { _, newOutput in
+                valueDidChange(to: newOutput)
+            }
+            .onChange(of: isFocused) { _, isFocused in
+                if !isFocused { presentPendingError() }
+            }
         } else {
             TextField(
                 text: textBinding,
@@ -107,25 +127,94 @@ where Label: View, F: ParseableFormatStyle, F.FormatOutput == String {
             )
             .textFieldStyle(style)
             .focused($isFocused)
-            .environment(\.customTextFieldParseError, error)
+            .environment(\.customTextFieldParseError, presentedError)
+            .onAppear { syncLocalText() }
+            .onChange(of: readValue()) { _, newOutput in
+                valueDidChange(to: newOutput)
+            }
+            .onChange(of: isFocused) { _, isFocused in
+                if !isFocused { presentPendingError() }
+            }
         }
     }
     
-    private func updateValue(_ value: String) {
-        do {
-            let parsedValue = try format.parseStrategy.parse(value)
-            self.value = parsedValue
-            self.error = nil
-        } catch {
-            self.localText = value
-            self.value = nil
-            self.error = error as? LocalizedError
+    private func updateValue(_ newText: String) {
+        localText = newText
+        
+        // Hide error immediately when user types (if configured)
+        if parseBehavior.hidesErrorOnInput {
+            presentedError = nil
         }
+        
+        do {
+            let parsedValue = try format.parseStrategy.parse(newText)
+            lastWrittenOutput = format.format(parsedValue)
+            self.value = parsedValue
+            self.latestError = nil
+            schedulePresentError(nil)
+        } catch {
+            // In strict/formatted mode, nil out value on parse failure.
+            // In lenient/raw mode, keep the last valid value so the form
+            // state doesn't change spuriously (e.g. Save button stays correct).
+            if parseBehavior.textDisplay == .formatted {
+                lastWrittenOutput = nil
+                self.value = nil
+            }
+            let localized = error as? LocalizedError
+            self.latestError = localized
+            schedulePresentError(localized)
+        }
+    }
+    
+    private func schedulePresentError(_ error: LocalizedError?) {
+        debounceTask?.cancel()
+        
+        switch parseBehavior.errorPresentation(for: error, isFocused: isFocused) {
+        case .now:
+            presentedError = error
+        case .afterDelay(let debounce):
+            debounceTask = Task { @MainActor in
+                try? await Task.sleep(for: debounce)
+                guard !Task.isCancelled else { return }
+                presentedError = latestError
+            }
+        case .onFocusLoss:
+            // Shown by `presentPendingError()` when the user leaves the field.
+            break
+        }
+    }
+
+    /// Shows the error that was held back while the user was typing.
+    private func presentPendingError() {
+        guard parseBehavior.errorPresentation(for: latestError, isFocused: true) == .onFocusLoss else { return }
+        debounceTask?.cancel()
+        presentedError = latestError
+    }
+
+    /// Brings the text in line with a value that changed outside the field,
+    /// such as a reset. Values the field wrote itself are left alone, so the
+    /// text the user is typing is not rewritten.
+    private func valueDidChange(to newOutput: String?) {
+        guard ParseBehavior.isExternalChange(newOutput, lastWritten: lastWrittenOutput) else { return }
+        lastWrittenOutput = newOutput
+        localText = newOutput ?? ""
+        debounceTask?.cancel()
+        latestError = nil
+        presentedError = nil
     }
     
     private func readValue() -> F.FormatOutput? {
         guard let value else { return nil }
         return format.format(value)
+    }
+    
+    /// Syncs `localText` from the current value so that `.raw` mode
+    /// shows the formatted content when the view first appears.
+    private func syncLocalText() {
+        lastWrittenOutput = readValue()
+        if let formatted = lastWrittenOutput {
+            localText = formatted
+        }
     }
 }
 
@@ -172,6 +261,15 @@ extension CustomTextFieldStyle {
 
 // MARK: - Preview
 
+/// Fill behind the demo fields: the bar material, which watchOS and tvOS do not have.
+private let previewBarFill: AnyShapeStyle = {
+    #if os(watchOS) || os(tvOS)
+    AnyShapeStyle(Color.secondary.opacity(0.2))
+    #else
+    AnyShapeStyle(Material.bar)
+    #endif
+}()
+
 private struct DemoTextFieldStyle: CustomTextFieldStyle {
     @Environment(\.lineLimit) private var lineLimit
     
@@ -197,7 +295,7 @@ private struct DemoTextFieldStyle: CustomTextFieldStyle {
         }
         .background {
             RoundedRectangle(cornerRadius: 12)
-                .foregroundStyle(.bar)
+                .foregroundStyle(previewBarFill)
         }
     }
 }
@@ -225,7 +323,7 @@ private struct PreviewView: View {
         TextField("Test", text: $text)
             .background {
                 RoundedRectangle(cornerRadius: 12)
-                    .foregroundStyle(.bar)
+                    .foregroundStyle(previewBarFill)
             }
     }
 }

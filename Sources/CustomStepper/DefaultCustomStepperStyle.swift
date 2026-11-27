@@ -1,3 +1,4 @@
+#if !os(tvOS)
 //
 //  DefaultCustomStepperStyle.swift
 //
@@ -27,3 +28,5 @@ public struct DefaultCustomStepperStyle: CustomStepperStyle {
         }
     }
 }
+
+#endif

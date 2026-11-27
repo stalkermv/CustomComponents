@@ -15,44 +15,140 @@ public struct CustomPicker<SelectionValue: Hashable, Content: View, Label: View>
     
     private let content: Content
     private let label: Label
-    
+    private let currentValueLabel: AnyView?
+
+    private init(
+        selection: Selection<SelectionValue>,
+        content: Content,
+        label: Label,
+        currentValueLabel: AnyView?
+    ) {
+        self.selection = selection
+        self.content = content
+        self.label = label
+        self.currentValueLabel = currentValueLabel
+    }
+
     @_disfavoredOverload
     public init(
         selection: Binding<SelectionValue>,
         @ViewBuilder content: () -> Content,
         @ViewBuilder label: () -> Label
     ) {
-        self.selection = .init(selection)
-        self.content = content()
-        self.label = label()
+        self.init(selection: .init(selection), content: content(), label: label(), currentValueLabel: nil)
     }
-    
+
+    public init(
+        selection: Binding<SelectionValue?>,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder label: () -> Label
+    ) {
+        self.init(selection: .init(selection), content: content(), label: label(), currentValueLabel: nil)
+    }
+
     public init(
         selection: Binding<Set<SelectionValue>>,
         @ViewBuilder content: () -> Content,
         @ViewBuilder label: () -> Label
     ) {
-        self.selection = .init(selection)
-        self.content = content()
-        self.label = label()
+        self.init(selection: .init(selection), content: content(), label: label(), currentValueLabel: nil)
     }
-    
+
+    /// Creates a picker that shows `currentValueLabel` as its value instead
+    /// of the selected option, such as a short name for a long option.
+    ///
+    /// The default style passes it to the system `Picker`, which shows it on
+    /// iOS 18, macOS 15, tvOS 18, watchOS 11 and later. Earlier systems show
+    /// the selected option. A custom style reads it from
+    /// `configuration.currentValueLabel`.
+    @_disfavoredOverload
+    public init<CurrentValueLabel: View>(
+        selection: Binding<SelectionValue>,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder label: () -> Label,
+        @ViewBuilder currentValueLabel: () -> CurrentValueLabel
+    ) {
+        self.init(
+            selection: .init(selection),
+            content: content(),
+            label: label(),
+            currentValueLabel: AnyView(currentValueLabel())
+        )
+    }
+
+    /// Creates an optional-selection picker that shows `currentValueLabel` as
+    /// its value instead of the selected option.
+    ///
+    /// The default style passes it to the system `Picker`, which shows it on
+    /// iOS 18, macOS 15, tvOS 18, watchOS 11 and later. Earlier systems show
+    /// the selected option. A custom style reads it from
+    /// `configuration.currentValueLabel`.
+    public init<CurrentValueLabel: View>(
+        selection: Binding<SelectionValue?>,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder label: () -> Label,
+        @ViewBuilder currentValueLabel: () -> CurrentValueLabel
+    ) {
+        self.init(
+            selection: .init(selection),
+            content: content(),
+            label: label(),
+            currentValueLabel: AnyView(currentValueLabel())
+        )
+    }
+
+    /// Creates a multiple-selection picker that shows `currentValueLabel` as
+    /// its value instead of the selected options.
+    ///
+    /// The default style passes it to the system `Picker`, which shows it on
+    /// iOS 18, macOS 15, tvOS 18, watchOS 11 and later. Earlier systems show
+    /// the selected options. A custom style reads it from
+    /// `configuration.currentValueLabel`.
+    public init<CurrentValueLabel: View>(
+        selection: Binding<Set<SelectionValue>>,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder label: () -> Label,
+        @ViewBuilder currentValueLabel: () -> CurrentValueLabel
+    ) {
+        self.init(
+            selection: .init(selection),
+            content: content(),
+            label: label(),
+            currentValueLabel: AnyView(currentValueLabel())
+        )
+    }
+
     public var body: some View {
         let configuration = CustomPickerConfiguration(
             selection: selection.binding,
             content: .init(body: AnyView(makeContent())),
-            label: .init(body: AnyView(label))
+            label: .init(body: AnyView(label)),
+            currentValueLabel: .init(body: currentValueLabel ?? AnyView(makeSelectedContent())),
+            hasCustomCurrentValueLabel: currentValueLabel != nil
         )
-        
+
         AnyView(style.resolve(configuration))
     }
-    
+
     private func makeContent() -> some View {
         ForEach(subviews: content) { subview in
             CustomPickerItem(
                 subview: subview,
                 selection: selection
             )
+        }
+    }
+
+    /// The options whose tag is selected, found here while the content and
+    /// the selection type are still concrete: a style sees the options wrapped
+    /// in items and the selection as `AnyHashable`, so it cannot match tags.
+    private func makeSelectedContent() -> some View {
+        ForEach(subviews: content) { subview in
+            let tag = subview.traitValues.tag(for: SelectionValue.self)
+                ?? subview.traitValues.tag(for: SelectionValue?.self).flatMap { $0 }
+            if let tag, selection.contains(tag) {
+                subview
+            }
         }
     }
 }
@@ -74,9 +170,20 @@ extension CustomPickerStyle {
 }
 
 extension CustomPicker {
+    @_disfavoredOverload
     public init(
         _ titleKey: LocalizedStringKey,
         selection: Binding<SelectionValue>,
+        @ViewBuilder content: @escaping () -> Content
+    ) where Label == Text {
+        self.init(selection: selection, content: content) {
+            Text(titleKey)
+        }
+    }
+
+    public init(
+        _ titleKey: LocalizedStringKey,
+        selection: Binding<SelectionValue?>,
         @ViewBuilder content: @escaping () -> Content
     ) where Label == Text {
         self.init(selection: selection, content: content) {
@@ -96,8 +203,27 @@ extension CustomPicker {
 }
 
 extension CustomPicker where Label == EmptyView {
+    @_disfavoredOverload
     public init(
         selection: Binding<SelectionValue>,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.init(selection: selection, content: content) {
+            EmptyView()
+        }
+    }
+
+    public init(
+        selection: Binding<SelectionValue?>,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.init(selection: selection, content: content) {
+            EmptyView()
+        }
+    }
+
+    public init(
+        selection: Binding<Set<SelectionValue>>,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.init(selection: selection, content: content) {
@@ -118,7 +244,9 @@ private struct PreviewView: View {
         } label: {
             Text("Select value")
         }
+        #if !os(watchOS)
         .pickerStyle(.segmented)
+        #endif
         .customPickerStyle(MyPickerStyle())
     }
 }

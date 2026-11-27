@@ -16,9 +16,20 @@ public struct CustomPickerConfiguration<SelectionValue: Hashable> {
     public struct Label: View {
         public let body: AnyView
     }
+
+    /// What the closed picker shows as its value: the `currentValueLabel`
+    /// the picker was given, otherwise the options whose tag is selected.
+    public struct CurrentValueLabel: View {
+        public let body: AnyView
+    }
     
     @Binding public var selection: SelectionValue
     
     public let content: Content
     public let label: Label
+    public let currentValueLabel: CurrentValueLabel
+
+    /// Whether the picker was given its own `currentValueLabel`, rather than
+    /// showing the selected options.
+    let hasCustomCurrentValueLabel: Bool
 }

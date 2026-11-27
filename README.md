@@ -7,18 +7,24 @@ CustomComponents is a Swift package offering a collection of reusable, productio
 - Modular Design: Each component is self-contained, promoting clean and maintainable code.
 - Swift Package Manager Support: Easily integrate into your projects using Swift Package Manager.
 
+## Requirements
+
+- Swift 6.1 or later
+- iOS 17, macOS 14, tvOS 17, or watchOS 10 and later
+- `CustomStepper` is not available on tvOS
+
 ## Installation
 
 You can add CustomComponents to your project using Swift Package Manager:
 1. In Xcode, go to File > Add Packages…
 2. Enter the repository URL: `https://github.com/stalkermv/CustomComponents`
-3. Select the development branch.
+3. Choose the version you need.
 
-Alternatively, add it directly to your Package.swift:
+Alternatively, add it directly to your Package.swift. 2.0 is currently a pre-release, so the requirement has to name it; `from: "2.0.0"` does not resolve pre-releases:
 
 ```
 dependencies: [
-    .package(url: "https://github.com/stalkermv/CustomComponents.git", branch: "development")
+    .package(url: "https://github.com/stalkermv/CustomComponents.git", from: "2.0.0-beta.5")
 ]
 ```
 
@@ -29,6 +35,8 @@ Import CustomComponents in your SwiftUI files:
 ```swift
 import CustomComponents
 ```
+
+One import is enough: it re-exports every component. If you only need a part of the package, import the module you need instead, for example `import DynamicScroll` or `import AsyncButton`.
 
 Then, utilize the provided components as needed. For example:
 
@@ -41,6 +49,33 @@ struct ContentView: View {
     }
 }
 ```
+
+### Capping a scrolling block
+
+```swift
+CommandOutput(lines)
+    .scrollHeightLimit(300, pinsToBottom: true)
+```
+
+The view is as tall as its content until 300 points, then scrolls inside itself. `ScrollViewThatFits(maxHeight:)` is the same as a view. On iOS 18, macOS 15, tvOS 18 and watchOS 11 and later the edges that can still scroll fade out; `scrollEdgeFade(_:)` turns that off.
+
+### Parsing text fields
+
+```swift
+CustomTextField("Amount", value: $amount, format: .currency(code: "USD"))
+    .parseBehavior(.lenient.debounced(.milliseconds(300)))
+```
+
+`.strict` (default) rewrites the text to the formatted output on every keystroke. `.lenient` keeps what the user typed and shows a parse error when the field loses focus, or after a pause in typing with `.debounced(_:)`. When the bound value changes from outside the field, such as a reset, the field shows the new value in either mode.
+
+### Notes
+
+- `AsyncButton` does not draw a progress indicator. While its action runs it sets the `isLoading` environment value, and the label or your `ButtonStyle` draws the indicator.
+- In a `Form` row, SwiftUI gives one tap to every button in the row. This affects any two buttons, so set `.buttonStyle(.plain)` on `CustomStepper` when you use it inside a `Form`.
+- `CustomCell` has no API for the width of its image column. You decide it in your `CustomCellStyle`.
+- To make a `CustomPicker` option unselectable, use `.selectionDisabled()` on the option. `.disabled(true)` inside an option only affects the option's own content: the picker cannot read it, so the option stays selectable.
+- `CustomPicker` takes three kinds of selection: `Binding<Value>` (one option, always set), `Binding<Value?>` (one option or none; choosing the selected option again clears it to `nil`), and `Binding<Set<Value>>` (any number of options). In custom styles an option tagged `nil`, such as `.tag(Int?.none)`, cannot be selected with an optional binding; leave it out and let the user clear the selection by choosing the selected option again.
+- The default `CustomPicker` style shows `currentValueLabel` on iOS 18, macOS 15, tvOS 18, watchOS 11 and later. Earlier systems show the selected option.
 
 ## License
 

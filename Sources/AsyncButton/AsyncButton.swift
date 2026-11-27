@@ -22,6 +22,20 @@ import SwiftUI
 /// }
 /// ```
 ///
+/// `AsyncButton` does not draw a progress indicator. While the action runs it sets the
+/// `isLoading` environment value for its label, so the label or your `ButtonStyle` draws
+/// whatever it wants:
+///
+/// ```swift
+/// struct Label: View {
+///     @Environment(\.isLoading) private var isLoading
+///
+///     var body: some View {
+///         if isLoading { ProgressView() } else { Text("Submit") }
+///     }
+/// }
+/// ```
+///
 /// - Note: Internally, this button uses a unique `executionID` to trigger side effects via a custom modifier.
 ///
 /// - Parameters:

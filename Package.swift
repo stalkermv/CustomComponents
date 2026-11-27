@@ -26,20 +26,21 @@ let components: [Component] = [
     Component(name: "CustomSection"),
     Component(name: "CustomStepper"),
     Component(name: "CustomContentUnavailableView"),
-    Component(name: "CustomTextField")
+    Component(name: "CustomTextField"),
+    Component(name: "DynamicScroll")
 ]
 
 let package = Package(
     name: "CustomComponents",
-    platforms: [.macOS(.v14), .iOS(.v16), .tvOS(.v15), .watchOS(.v10), .macCatalyst(.v15)],
+    platforms: [.macOS(.v14), .iOS(.v17), .tvOS(.v17), .watchOS(.v10), .macCatalyst(.v17)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(name: "CustomComponents", targets: ["CustomComponents"]),
     ],
     dependencies: [
         .package(url: "https://github.com/stalkermv/SwiftHelpers.git", from: "1.0.0"),
-        .package(url: "https://github.com/stalkermv/SwiftUIHelpers.git", from: "1.0.0"),
-        .package(url: "https://github.com/stalkermv/SwiftUIBackports.git", from: "1.1.0"),
+        .package(url: "https://github.com/stalkermv/SwiftUIHelpers.git", from: "2.0.0-beta.2"),
+        .package(url: "https://github.com/stalkermv/SwiftUIBackports.git", from: "2.0.0-beta.1"),
     ]
 )
 
@@ -49,4 +50,12 @@ let componentsTargets: [Target] = components.map { component in
     .target(name: component.name, dependencies: component.dependencies)
 }
 
-package.targets = [umbrella, testTarget] + componentsTargets
+/// Components with tests of their own list them here.
+let componentTestTargets: [Target] = [
+    .testTarget(name: "CustomPickerTests", dependencies: ["CustomPicker"]),
+    .testTarget(name: "DynamicScrollTests", dependencies: ["DynamicScroll"]),
+    .testTarget(name: "CustomTextFieldTests", dependencies: ["CustomTextField"]),
+    .testTarget(name: "CustomComponentsImportTests", dependencies: ["CustomComponents"]),
+]
+
+package.targets = [umbrella, testTarget] + componentsTargets + componentTestTargets

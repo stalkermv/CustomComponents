@@ -1,3 +1,4 @@
+#if !os(tvOS)
 //
 //  CustomStepperElementConfiguration.swift
 //
@@ -15,3 +16,5 @@ public struct CustomStepperElementConfiguration {
     /// A closure that should be called to perform a decrement action.
     public let onDecrement: () -> Void
 }
+
+#endif
