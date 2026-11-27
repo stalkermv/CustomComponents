@@ -19,6 +19,7 @@ struct ImportTests {
         _ = Text("x").scrollHeightLimit(50)
         _ = CustomTextField("name", text: .constant(""))
         _ = CustomPicker(selection: .constant(1)) { Text("one").tag(1) } label: { Text("pick") }
+        _ = CustomPicker(selection: .constant(Int?.some(1))) { Text("one").tag(1) }
         #if !os(tvOS)
         _ = CustomStepper("n", value: .constant(1), step: 1)
         #endif

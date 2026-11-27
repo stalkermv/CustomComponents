@@ -52,6 +52,7 @@ let componentsTargets: [Target] = components.map { component in
 
 /// Components with tests of their own list them here.
 let componentTestTargets: [Target] = [
+    .testTarget(name: "CustomPickerTests", dependencies: ["CustomPicker"]),
     .testTarget(name: "DynamicScrollTests", dependencies: ["DynamicScroll"]),
     .testTarget(name: "CustomTextFieldTests", dependencies: ["CustomTextField"]),
     .testTarget(name: "CustomComponentsImportTests", dependencies: ["CustomComponents"]),

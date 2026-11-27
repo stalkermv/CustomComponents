@@ -74,6 +74,7 @@ CustomTextField("Amount", value: $amount, format: .currency(code: "USD"))
 - In a `Form` row, SwiftUI gives one tap to every button in the row. This affects any two buttons, so set `.buttonStyle(.plain)` on `CustomStepper` when you use it inside a `Form`.
 - `CustomCell` has no API for the width of its image column. You decide it in your `CustomCellStyle`.
 - To make a `CustomPicker` option unselectable, use `.selectionDisabled()` on the option. `.disabled(true)` inside an option only affects the option's own content: the picker cannot read it, so the option stays selectable.
+- `CustomPicker` takes three kinds of selection: `Binding<Value>` (one option, always set), `Binding<Value?>` (one option or none; choosing the selected option again clears it to `nil`), and `Binding<Set<Value>>` (any number of options). In custom styles an option tagged `nil`, such as `.tag(Int?.none)`, cannot be selected with an optional binding; leave it out and let the user clear the selection by choosing the selected option again.
 - The default `CustomPicker` style shows `currentValueLabel` on iOS 18, macOS 15, tvOS 18, watchOS 11 and later. Earlier systems show the selected option.
 
 ## License

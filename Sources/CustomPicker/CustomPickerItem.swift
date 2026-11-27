@@ -21,6 +21,7 @@ struct CustomPickerItem<SelectionValue: Hashable> : View {
 
     var body: some View {
         let tag = subview.traitValues.tag(for: SelectionValue.self)
+            ?? subview.traitValues.tag(for: SelectionValue?.self).flatMap { $0 }
         let isSelected = tag.map(selection.contains(_:)) ?? false
         // An option with no tag cannot be chosen, so it is not a control the
         // user can aim at either — otherwise it looks pressable and answers

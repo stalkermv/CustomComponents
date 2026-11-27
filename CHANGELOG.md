@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+### Added
+
+- `CustomPicker`: optional single selection via `Binding<SelectionValue?>` (plus `EmptyView`-label overloads for required, optional, and multiple selection), where tapping the already-selected option clears the selection back to `nil`.
+
+### Changed
+
+- `CustomPicker(selection:)` with a `Binding<Value?>` now uses optional selection instead of single selection over `Value?`. In custom styles an option tagged `nil`, such as `.tag(Int?.none)`, can no longer be selected; choosing the selected option again clears the selection instead.
+
 ### Fixed
 
 - The default `CustomPicker` style ignored `currentValueLabel`. It now passes it to the system `Picker`, which shows it on iOS 18, macOS 15, tvOS 18, watchOS 11 and later; earlier systems show the selected option.
@@ -12,6 +20,7 @@ All notable changes to this project are documented in this file.
 
 ### Documentation
 
+- The README lists the three kinds of `CustomPicker` selection.
 - `.disabled(true)` inside a `CustomPicker` option does not reach the picker, so the option stays selectable; use `.selectionDisabled()` on the option. Noted in the README.
 - The README parsing example now uses an initializer that exists (`CustomTextField("Amount", value:format:)`), and a test keeps it compiling.
 

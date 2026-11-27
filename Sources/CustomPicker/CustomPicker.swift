@@ -39,6 +39,14 @@ public struct CustomPicker<SelectionValue: Hashable, Content: View, Label: View>
     }
 
     public init(
+        selection: Binding<SelectionValue?>,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder label: () -> Label
+    ) {
+        self.init(selection: .init(selection), content: content(), label: label(), currentValueLabel: nil)
+    }
+
+    public init(
         selection: Binding<Set<SelectionValue>>,
         @ViewBuilder content: () -> Content,
         @ViewBuilder label: () -> Label
@@ -56,6 +64,27 @@ public struct CustomPicker<SelectionValue: Hashable, Content: View, Label: View>
     @_disfavoredOverload
     public init<CurrentValueLabel: View>(
         selection: Binding<SelectionValue>,
+        @ViewBuilder content: () -> Content,
+        @ViewBuilder label: () -> Label,
+        @ViewBuilder currentValueLabel: () -> CurrentValueLabel
+    ) {
+        self.init(
+            selection: .init(selection),
+            content: content(),
+            label: label(),
+            currentValueLabel: AnyView(currentValueLabel())
+        )
+    }
+
+    /// Creates an optional-selection picker that shows `currentValueLabel` as
+    /// its value instead of the selected option.
+    ///
+    /// The default style passes it to the system `Picker`, which shows it on
+    /// iOS 18, macOS 15, tvOS 18, watchOS 11 and later. Earlier systems show
+    /// the selected option. A custom style reads it from
+    /// `configuration.currentValueLabel`.
+    public init<CurrentValueLabel: View>(
+        selection: Binding<SelectionValue?>,
         @ViewBuilder content: () -> Content,
         @ViewBuilder label: () -> Label,
         @ViewBuilder currentValueLabel: () -> CurrentValueLabel
@@ -115,8 +144,9 @@ public struct CustomPicker<SelectionValue: Hashable, Content: View, Label: View>
     /// in items and the selection as `AnyHashable`, so it cannot match tags.
     private func makeSelectedContent() -> some View {
         ForEach(subviews: content) { subview in
-            if let tag = subview.traitValues.tag(for: SelectionValue.self),
-               selection.contains(tag) {
+            let tag = subview.traitValues.tag(for: SelectionValue.self)
+                ?? subview.traitValues.tag(for: SelectionValue?.self).flatMap { $0 }
+            if let tag, selection.contains(tag) {
                 subview
             }
         }
@@ -140,9 +170,20 @@ extension CustomPickerStyle {
 }
 
 extension CustomPicker {
+    @_disfavoredOverload
     public init(
         _ titleKey: LocalizedStringKey,
         selection: Binding<SelectionValue>,
+        @ViewBuilder content: @escaping () -> Content
+    ) where Label == Text {
+        self.init(selection: selection, content: content) {
+            Text(titleKey)
+        }
+    }
+
+    public init(
+        _ titleKey: LocalizedStringKey,
+        selection: Binding<SelectionValue?>,
         @ViewBuilder content: @escaping () -> Content
     ) where Label == Text {
         self.init(selection: selection, content: content) {
@@ -162,8 +203,27 @@ extension CustomPicker {
 }
 
 extension CustomPicker where Label == EmptyView {
+    @_disfavoredOverload
     public init(
         selection: Binding<SelectionValue>,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.init(selection: selection, content: content) {
+            EmptyView()
+        }
+    }
+
+    public init(
+        selection: Binding<SelectionValue?>,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.init(selection: selection, content: content) {
+            EmptyView()
+        }
+    }
+
+    public init(
+        selection: Binding<Set<SelectionValue>>,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.init(selection: selection, content: content) {
